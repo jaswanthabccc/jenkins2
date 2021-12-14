@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "maven"
+    }
+
+    stages {
+        stage('Gitcheckout') {
+            steps {
+             checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'git_credentials', url: 'https://github.com/kishancs2020/webAppExample.git']]])
+                }
+                }
+                stage('Build') {
+                    steps {
+                        bat 'mvn clean install'
+                    }
+                    }
+                    stage('çodequality') {
+                        steps {
+                            bat 'mvn sonar:sonar'
+                        }
+                        }
+                        stage('deploy') {
+                            steps {
+                                deploy adapters: [tomcat8(credentialsId: 'tomcat_new_cred', path: '', url: 'http://localhost:8000/')], contextPath: 'webappExamplepipeline', war: '**/*.war'
+                            }
+                        }
+                    
+                
+        
+    }
+}
